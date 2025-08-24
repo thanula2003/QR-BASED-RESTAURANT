@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant - Pending Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+        
+        h1 {
+            color: #e63946;
+            font-size: 2.5rem;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 10px 20px;
+        }
+        
+        .stat-box h3 {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e63946;
+        }
+        
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .order-card.deleting {
+            transform: scale(0.9);
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: #e63946;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .order-time {
+            font-size: 0.85rem;
+        }
+        
+        .card-body {
+            padding: 15px;
+            flex-grow: 1;
+        }
+        
+        .order-items {
+            margin-bottom: 15px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+            font-size: 0.9rem;
+        }
+        
+        .item-details {
+            flex: 2;
+        }
+        
+        .item-name {
+            font-weight: bold;
+        }
+        
+        .item-amount {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding-top: 10px;
+            border-top: 2px solid #ff6b6b;
+        }
+        
+        .card-footer {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-prepare {
+            background: #ff9e1b;
+            color: white;
+        }
+        
+        .btn-prepare:hover {
+            background: #ff8c00;
+        }
+        
+        .btn-complete {
+            background: #2a9d8f;
+            color: white;
+        }
+        
+        .btn-complete:hover {
+            background: #21867a;
+        }
+        
+        .completion-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(42, 157, 143, 0.9);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInOut 1.5s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            30% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        .checkmark {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            color: #2a9d8f;
+            font-size: 60px;
+            line-height: 80px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        
+        @media (max-width: 1200px) {
+            .orders-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .stats {
+                width: 100%;
+            }
+            
+            .completion-animation {
+                padding: 20px 30px;
+                font-size: 1.5rem;
+            }
+            
+            .checkmark {
+                width: 60px;
+                height: 60px;
+                font-size: 40px;
+                line-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-utensils"></i> Pending Orders</h1>
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>Pending Orders</h3>
+                    <p id="order-count">8</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="orders-grid" id="orders-container">
+            <!-- Order 1 -->
+            <div class="order-card" data-id="1">
+                <div class="card-header">
+                    <div class="table-number">Table #5</div>
+                    <div class="order-time">12 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Margherita Pizza</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$22.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Caesar Salad</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$9.50</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Sparkling Water</div>
+                                <div class="item-amount">Amount: 3</div>
+                            </div>
+                            <div class="item-price">$9.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$40.50</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+            
+            <!-- Order 2 -->
+            <div class="order-card" data-id="2">
+                <div class="card-header">
+                    <div class="table-number">Table #12</div>
+                    <div class="order-time">8 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Beef Burger</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$24.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">French Fries</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$10.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Chocolate Shake</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$6.50</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Onion Rings</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$8.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Grilled Chicken Sandwich</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$12.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Iced Tea</div>
+                                <div class="item-amount">Amount: 3</div>
+                            </div>
+                            <div class="item-price">$9.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$69.50</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+            
+            <!-- Order 3 -->
+            <div class="order-card" data-id="3">
+                <div class="card-header">
+                    <div class="table-number">Table #8</div>
+                    <div class="order-time">5 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Grilled Salmon</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$18.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Mashed Potatoes</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$5.50</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">House Salad</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$7.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$30.50</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+            
+            <!-- Order 4 -->
+            <div class="order-card" data-id="4">
+                <div class="card-header">
+                    <div class="table-number">Takeaway #3</div>
+                    <div class="order-time">15 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Chicken Alfredo Pasta</div>
+                                <div class="item-amount">Amount: 3</div>
+                            </div>
+                            <div class="item-price">$36.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Garlic Bread</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$8.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$44.00</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+            
+            <!-- Order 5 -->
+            <div class="order-card" data-id="5">
+                <div class="card-header">
+                    <div class="table-number">Table #10</div>
+                    <div class="order-time">18 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Prime Rib Steak</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$48.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Baked Potato</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$10.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Red Wine</div>
+                                <div class="item-amount">Amount: 1</div>
+                            </div>
+                            <div class="item-price">$12.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$70.00</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+            
+            <!-- Order 6 -->
+            <div class="order-card" data-id="6">
+                <div class="card-header">
+                    <div class="table-number">Table #3</div>
+                    <div class="order-time">7 min ago</div>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Vegetable Stir Fry</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$22.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Steamed Rice</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$8.00</div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-details">
+                                <div class="item-name">Green Tea</div>
+                                <div class="item-amount">Amount: 2</div>
+                            </div>
+                            <div class="item-price">$6.00</div>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <div>Total:</div>
+                        <div>$36.00</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-prepare">Preparing</button>
+                    <button class="btn btn-complete">Complete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-animation" id="completion-animation">
+        <i class="checkmark">✓</i> Order Completed!
+    </div>
+
+    <script>
+        // Update order count
+        function updateOrderCount() {
+            const orderCount = document.querySelectorAll('.order-card:not(.deleting)').length;
+            document.getElementById('order-count').textContent = orderCount;
+        }
+        
+        // Show completion animation
+        function showCompletionAnimation() {
+            const animation = document.getElementById('completion-animation');
+            animation.style.display = 'block';
+            
+            setTimeout(() => {
+                animation.style.display = 'none';
+            }, 1500);
+        }
+        
+        // Complete order functionality
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.order-card');
+                
+                // Add deleting class for animation
+                card.classList.add('deleting');
+                
+                // Show completion animation
+                showCompletionAnimation();
+                
+                // Remove card after animation completes
+                setTimeout(() => {
+                    card.remove();
+                    updateOrderCount();
+                }, 400);
+            });
+        });
+        
+        // Preparing button functionality
+        document.querySelectorAll('.btn-prepare').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.backgroundColor = '#e63946';
+                this.textContent = 'Preparing...';
+            });
+        });
+        
+        // Initialize order count
+        updateOrderCount();
+    </script>
+</body>
+</html>

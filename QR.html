@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table QR Management</title>
+  <style>
+    :root {
+      --primary-red: #E4002B;
+      --dark-red: #C10024;
+      --dark: #231F20;
+      --light: #FFFFFF;
+      --yellow: #FFC72C;
+      --light-gray: #F5F5F5;
+      --medium-gray: #E0E0E0;
+      --dark-gray: #757575;
+      --success: #4CAF50;
+      --warning: #FF9800;
+      --info: #2196F3;
+      --sidebar-width: 250px;
+      --header-height: 56px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--light-gray);
+      color: var(--dark);
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--primary-red);
+      color: var(--light);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .form-box {
+      margin-bottom: 40px;
+      border: 1px solid var(--medium-gray);
+      padding: 25px;
+      border-radius: 10px;
+      background: var(--light);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .form-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: var(--primary-red);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    
+    input:focus {
+      border-color: var(--primary-red);
+      outline: none;
+    }
+    
+    button {
+      background: var(--primary-red);
+      color: var(--light);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    
+    button:hover {
+      background: var(--dark-red);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+    
+    .tables-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+    
+    .table-box {
+      background: var(--light);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s;
+      border: 1px solid var(--medium-gray);
+    }
+    
+    .table-box:hover {
+      transform: translateY(-5px);
+    }
+    
+    .table-header {
+      background: var(--primary-red);
+      color: var(--light);
+      padding: 15px;
+    }
+    
+    .table-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .qr-code {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--light-gray);
+      min-height: 200px;
+    }
+    
+    .qr-code img {
+      max-width: 100%;
+      max-height: 180px;
+      border: 1px solid var(--medium-gray);
+    }
+    
+    .table-actions {
+      padding: 15px;
+      text-align: center;
+      border-top: 1px solid var(--medium-gray);
+    }
+    
+    .delete-btn {
+      background: var(--dark-red);
+      color: var(--light);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    
+    .delete-btn:hover {
+      background: var(--dark);
+      transform: translateY(-2px);
+    }
+    
+    .no-tables {
+      text-align: center;
+      padding: 40px;
+      background: var(--light);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      grid-column: 1 / -1;
+      border: 1px solid var(--medium-gray);
+    }
+    
+    .no-tables p {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 20px;
+    }
+    
+    .upload-btn-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .upload-btn-wrapper .btn {
+      border: 1px solid var(--primary-red);
+      color: var(--primary-red);
+      background-color: var(--light);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      width: 100%;
+      text-align: center;
+      cursor: pointer;
+    }
+    
+    .upload-btn-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-name {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .tables-container {
+        grid-template-columns: 1fr;
+      }
+      
+      body {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Manage Tables & QR Codes</h1>
+      <p>Add and manage tables with their QR codes</p>
+    </header>
+
+    <!-- Add Table Form -->
+    <div class="form-box">
+      <h2 class="form-title">Add New Table</h2>
+      <form id="table-form">
+        <div class="form-group">
+          <label for="table-name">Table Name</label>
+          <input type="text" id="table-name" placeholder="e.g., Table 1" required>
+        </div>
+        <div class="form-group">
+          <label for="qr-upload">Upload QR Code</label>
+          <div class="upload-btn-wrapper">
+            <button type="button" class="btn">Choose QR Code Image</button>
+            <input type="file" id="qr-upload" accept="image/*" required>
+          </div>
+          <div class="file-name" id="file-name">No file chosen</div>
+        </div>
+        <button type="submit">Add Table</button>
+      </form>
+    </div>
+
+    <!-- Display Tables -->
+    <div class="tables-container" id="tables-container">
+      <!-- Tables will be displayed here -->
+      <div class="no-tables">
+        <p>No tables added yet. Add a table to get started.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tableForm = document.getElementById('table-form');
+      const tablesContainer = document.getElementById('tables-container');
+      const qrUpload = document.getElementById('qr-upload');
+      const fileName = document.getElementById('file-name');
+      
+      // Load tables from localStorage if available
+      let tables = JSON.parse(localStorage.getItem('tables')) || [];
+      
+      // Update file name when a file is selected
+      qrUpload.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          fileName.textContent = this.files[0].name;
+        } else {
+          fileName.textContent = 'No file chosen';
+        }
+      });
+      
+      // Render existing tables
+      renderTables();
+      
+      // Add new table
+      tableForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const tableName = document.getElementById('table-name').value;
+        const qrFile = qrUpload.files[0];
+        
+        if (tableName && qrFile) {
+          // Read the QR code file
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            // Create table object
+            const table = {
+              id: Date.now(), // unique ID
+              name: tableName,
+              qrCode: e.target.result,
+              added: new Date().toLocaleDateString()
+            };
+            
+            // Add to array
+            tables.push(table);
+            
+            // Save to localStorage
+            localStorage.setItem('tables', JSON.stringify(tables));
+            
+            // Re-render tables
+            renderTables();
+            
+            // Reset form
+            tableForm.reset();
+            fileName.textContent = 'No file chosen';
+          };
+          reader.readAsDataURL(qrFile);
+        }
+      });
+      
+      // Render tables function
+      function renderTables() {
+        if (tables.length === 0) {
+          tablesContainer.innerHTML = `
+            <div class="no-tables">
+              <p>No tables added yet. Add a table to get started.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        tablesContainer.innerHTML = '';
+        
+        tables.forEach(table => {
+          const tableBox = document.createElement('div');
+          tableBox.className = 'table-box';
+          
+          tableBox.innerHTML = `
+            <div class="table-header">
+              <div class="table-name">${table.name}</div>
+            </div>
+            <div class="qr-code">
+              <img src="${table.qrCode}" alt="QR Code for ${table.name}">
+            </div>
+            <div class="table-actions">
+              <button class="delete-btn" data-id="${table.id}">Delete Table</button>
+            </div>
+          `;
+          
+          tablesContainer.appendChild(tableBox);
+        });
+        
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const tableId = parseInt(this.getAttribute('data-id'));
+            deleteTable(tableId);
+          });
+        });
+      }
+      
+      // Delete table function
+      function deleteTable(tableId) {
+        if (confirm('Are you sure you want to delete this table?')) {
+          tables = tables.filter(table => table.id !== tableId);
+          localStorage.setItem('tables', JSON.stringify(tables));
+          renderTables();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
