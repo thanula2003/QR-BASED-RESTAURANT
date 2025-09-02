@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant - Order Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #E4002B;
+            --dark-red: #C10024;
+            --dark: #231F20;
+            --light: #FFFFFF;
+            --yellow: #FFC72C;
+            --light-gray: #F5F5F5;
+            --medium-gray: #E0E0E0;
+            --dark-gray: #757575;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --info: #2196F3;
+            --danger: #F44336;
+            --border-radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: #E4002B;
+            color: white;
+            padding: 25px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+        
+        .logo {
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo i {
+            color: var(--yellow);
+        }
+        
+        .nav-stats {
+            padding: 0 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .nav-stat {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+        
+        .nav-stat:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-stat i {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .nav-stat-content h3 {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 4px;
+        }
+        
+        .nav-stat-content p {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .pending-stat i { color: var(--light); }
+        .cash-stat i { color: var(--yellow); }
+        .preparing-stat i { color: var(--light); }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .content-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .content-header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-filter {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-filter:hover {
+            border-color: var(--primary-red);
+        }
+        
+        /* Orders Container */
+        .orders-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            border-top: 5px solid var(--primary-red);
+        }
+        
+        .order-card.cash {
+            border-top-color: var(--yellow);
+        }
+        
+        .order-card.preparing {
+            border-top-color: var(--info);
+        }
+        
+        .order-card.deleting {
+            transform: scale(0.9);
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: var(--light-gray);
+            border-bottom: 1px solid var(--medium-gray);
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        .table-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .order-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .order-code {
+            font-size: 0.85rem;
+            background: var(--medium-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .payment-status {
+            font-size: 0.85rem;
+            background: var(--primary-red);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .order-card.cash .payment-status {
+            background: var(--yellow);
+            color: var(--dark);
+        }
+        
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        
+        .btn-cancel-header {
+            background: var(--medium-gray);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+        }
+        
+        .btn-cancel-header:hover {
+            background: var(--danger);
+            color: white;
+            transform: rotate(90deg);
+        }
+        
+        .order-time {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .card-body {
+            padding: 20px;
+            flex-grow: 1;
+        }
+        
+        .order-items {
+            margin-bottom: 20px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--medium-gray);
+        }
+        
+        .item-details {
+            flex: 2;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        
+        .item-amount {
+            color: var(--dark-gray);
+            font-size: 0.85rem;
+        }
+        
+        .item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding-top: 15px;
+            border-top: 2px solid var(--medium-gray);
+            color: var(--dark);
+        }
+        
+        .card-footer {
+            padding: 15px 20px;
+            background: var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-prepare {
+            background: var(--info);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-prepare.preparing {
+            background: var(--info);
+        }
+        
+        .btn-prepare:hover {
+            background: #0b76bc;
+        }
+        
+        .btn-prepare.preparing:hover {
+            background: #3aafaa;
+        }
+        
+        .btn-complete {
+            background: var(--success);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-complete:hover {
+            background: #3d8b40;
+        }
+        
+        /* Animations */
+        .completion-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            padding: 30px 50px;
+            border-radius: var(--border-radius);
+            font-size: 1.8rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeInOut 1.5s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(-20px) scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        
+        .confirmation-modal.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--danger);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-message {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .modal-btn-confirm {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background: #d32f2f;
+        }
+        
+        .modal-btn-cancel {
+            background: var(--medium-gray);
+            color: var(--dark);
+        }
+        
+        .modal-btn-cancel:hover {
+            background: var(--dark-gray);
+            color: white;
+        }
+        
+        .cancellation-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(244, 67, 54, 0.95);
+            color: white;
+            padding: 30px 50px;
+            border-radius: var(--border-radius);
+            font-size: 1.8rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeInOut 1.5s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .checkmark {
+            display: inline-block;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            color: var(--success);
+            font-size: 50px;
+            line-height: 70px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        
+        .crossmark {
+            display: inline-block;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            color: var(--danger);
+            font-size: 50px;
+            line-height: 70px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            30% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .orders-container {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+            
+            .nav-stats {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .nav-stat {
+                min-width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .orders-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .content-header-actions {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .completion-animation, .cancellation-animation {
+                padding: 20px 30px;
+                font-size: 1.5rem;
+            }
+            
+            .checkmark, .crossmark {
+                width: 50px;
+                height: 50px;
+                font-size: 35px;
+                line-height: 50px;
+            }
+            
+            .card-footer {
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                flex: 1 0 45%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .card-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-right {
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1><i class="fas fa-drumstick-bite"></i> Tasty Legs</h1>
+            </div>
+            
+            <div class="nav-stats">
+                <div class="nav-stat pending-stat">
+                    <i class="fas fa-hourglass-half"></i>
+                    <div class="nav-stat-content">
+                        <h3>Pending Orders</h3>
+                        <p id="pending-count">3</p>
+                    </div>
+                </div>
+                
+                <div class="nav-stat cash-stat">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div class="nav-stat-content">
+                        <h3>Pending Cash</h3>
+                        <p id="cash-count">3</p>
+                    </div>
+                </div>
+                
+                <div class="nav-stat preparing-stat">
+                    <i class="fas fa-utensils"></i>
+                    <div class="nav-stat-content">
+                        <h3>Preparing Orders</h3>
+                        <p id="preparing-count">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            
+            
+            <div class="orders-container" id="cash-orders">
+                <!-- Order 2 (Cash on table) -->
+                <div class="order-card cash" data-id="2" data-time="8" data-total="48.50">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Table #12</div>
+                            <div class="order-meta">
+                                <div class="order-code">#482619</div>
+                                <div class="payment-status">Cash on Table</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 8 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Beef Burger</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.24.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">French Fries</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.10.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Chocolate Shake</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.6.50</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Onion Rings</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.8.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.48.50</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 3 (Cash on table) -->
+                <div class="order-card cash" data-id="3" data-time="5" data-total="30.50">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Table #8</div>
+                            <div class="order-meta">
+                                <div class="order-code">#739205</div>
+                                <div class="payment-status">Cash on Table</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 5 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Grilled Salmon</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.18.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Mashed Potatoes</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.5.50</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">House Salad</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.7.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.30.50</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 5 (Cash on table) -->
+                <div class="order-card cash" data-id="5" data-time="18" data-total="70.00">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Table #10</div>
+                            <div class="order-meta">
+                                <div class="order-code">#156842</div>
+                                <div class="payment-status">Cash on Table</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 18 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Prime Rib Steak</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.48.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Baked Potato</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.10.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Red Wine</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.12.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.70.00</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Orders Section -->
+            <div class="content-header">
+                <h2><i class="fas fa-clock"></i> Pending Orders</h2>
+                
+            </div>
+            
+            <div class="orders-container" id="pending-orders">
+                <!-- Order 1 (Already paid) -->
+                <div class="order-card" data-id="1" data-time="12" data-total="40.50">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Table #5</div>
+                            <div class="order-meta">
+                                <div class="order-code">#924718</div>
+                                <div class="payment-status">Already Paid</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 12 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Margherita Pizza</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.22.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Caesar Salad</div>
+                                    <div class="item-amount">Amount: 1</div>
+                                </div>
+                                <div class="item-price">Rs.9.50</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Sparkling Water</div>
+                                    <div class="item-amount">Amount: 3</div>
+                                </div>
+                                <div class="item-price">Rs.9.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.40.50</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 4 (Already paid) -->
+                <div class="order-card" data-id="4" data-time="15" data-total="44.00">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Takeaway #3</div>
+                            <div class="order-meta">
+                                <div class="order-code">#583926</div>
+                                <div class="payment-status">Already Paid</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 15 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Chicken Alfredo Pasta</div>
+                                    <div class="item-amount">Amount: 3</div>
+                                </div>
+                                <div class="item-price">Rs.36.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Garlic Bread</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.8.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.44.00</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 6 (Already paid) -->
+                <div class="order-card" data-id="6" data-time="7" data-total="36.00">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <div class="table-number">Table #3</div>
+                            <div class="order-meta">
+                                <div class="order-code">#371459</div>
+                                <div class="payment-status">Already Paid</div>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <button class="btn-cancel-header" title="Cancel Order">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="order-time">
+                                <i class="far fa-clock"></i> 7 min ago
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Vegetable Stir Fry</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.22.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Steamed Rice</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.8.00</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="item-details">
+                                    <div class="item-name">Green Tea</div>
+                                    <div class="item-amount">Amount: 2</div>
+                                </div>
+                                <div class="item-price">Rs.6.00</div>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <div>Total:</div>
+                            <div>Rs.36.00</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-prepare">
+                            <i class="fas fa-blender"></i> Prepare
+                        </button>
+                        <button class="btn btn-complete">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-animation" id="completion-animation">
+        <i class="checkmark">✓</i> Order Completed!
+    </div>
+    
+    <div class="cancellation-animation" id="cancellation-animation">
+        <i class="crossmark">✕</i> Order Cancelled!
+    </div>
+    
+    <div class="confirmation-modal" id="confirmation-modal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-exclamation-circle"></i> Confirm Cancellation</h3>
+            <p class="modal-message" id="modal-message">Are you sure you want to cancel this order?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="modal-cancel">No, Keep It</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-confirm">Yes, Cancel Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const pendingOrdersContainer = document.getElementById('pending-orders');
+    const cashOrdersContainer = document.getElementById('cash-orders');
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const completionAnimation = document.getElementById('completion-animation');
+    const cancellationAnimation = document.getElementById('cancellation-animation');
+    const modalMessage = document.getElementById('modal-message');
+    const modalConfirm = document.getElementById('modal-confirm');
+    const modalCancel = document.getElementById('modal-cancel');
+    const sortByTimeBtn = document.getElementById('sortByTimeBtn');
+    
+    // Order counters
+    const pendingCount = document.getElementById('pending-count');
+    const cashCount = document.getElementById('cash-count');
+    const preparingCount = document.getElementById('preparing-count');
+    
+    // Initialize counters
+    updateOrderCounts();
+    
+    // Sort orders by time (oldest first, then by price if same time)
+    sortOrdersByTime();
+    
+    // Event delegation for all buttons
+    document.addEventListener('click', function(e) {
+        // Prepare button clicked
+        if (e.target.classList.contains('btn-prepare') || 
+            e.target.parentElement.classList.contains('btn-prepare')) {
+            const btn = e.target.classList.contains('btn-prepare') ? 
+                        e.target : e.target.parentElement;
+            togglePrepareOrder(btn);
+        }
+        
+        // Complete button clicked
+        else if (e.target.classList.contains('btn-complete') || 
+                 e.target.parentElement.classList.contains('btn-complete')) {
+            const btn = e.target.classList.contains('btn-complete') ? 
+                        e.target : e.target.parentElement;
+            completeOrder(btn);
+        }
+        
+        // Cancel button clicked
+        else if (e.target.classList.contains('btn-cancel-header') || 
+                 e.target.parentElement.classList.contains('btn-cancel-header')) {
+            const btn = e.target.classList.contains('btn-cancel-header') ? 
+                        e.target : e.target.parentElement;
+            showCancelConfirmation(btn);
+        }
+        
+        // Sort by time button clicked
+        else if (e.target.id === 'sortByTimeBtn' || e.target.parentElement.id === 'sortByTimeBtn') {
+            sortOrdersByTime();
+        }
+    });
+    
+    // Modal event listeners
+    modalCancel.addEventListener('click', function() {
+        confirmationModal.classList.remove('active');
+    });
+    
+    modalConfirm.addEventListener('click', function() {
+        const orderId = modalConfirm.dataset.orderId;
+        cancelOrder(orderId);
+        confirmationModal.classList.remove('active');
+    });
+    
+    // Sort orders by time (oldest first, then by price if same time)
+    function sortOrdersByTime() {
+        // Sort pending orders
+        const pendingOrders = Array.from(pendingOrdersContainer.querySelectorAll('.order-card'));
+        pendingOrders.sort((a, b) => {
+            const timeA = parseInt(a.dataset.time);
+            const timeB = parseInt(b.dataset.time);
+            const totalA = parseFloat(a.dataset.total);
+            const totalB = parseFloat(b.dataset.total);
+            
+            // First sort by time (oldest first)
+            if (timeA !== timeB) {
+                return timeA - timeB;
+            }
+            
+            // If same time, sort by total price (highest first)
+            return totalB - totalA;
+        });
+        
+        // Clear and re-append sorted pending orders
+        pendingOrdersContainer.innerHTML = '';
+        pendingOrders.forEach(order => pendingOrdersContainer.appendChild(order));
+        
+        // Sort cash orders
+        const cashOrders = Array.from(cashOrdersContainer.querySelectorAll('.order-card'));
+        cashOrders.sort((a, b) => {
+            const timeA = parseInt(a.dataset.time);
+            const timeB = parseInt(b.dataset.time);
+            const totalA = parseFloat(a.dataset.total);
+            const totalB = parseFloat(b.dataset.total);
+            
+            // First sort by time (oldest first)
+            if (timeA !== timeB) {
+                return timeA - timeB;
+            }
+            
+            // If same time, sort by total price (highest first)
+            return totalB - totalA;
+        });
+        
+        // Clear and re-append sorted cash orders
+        cashOrdersContainer.innerHTML = '';
+        cashOrders.forEach(order => cashOrdersContainer.appendChild(order));
+    }
+    
+    // Toggle prepare status
+    function togglePrepareOrder(button) {
+        const orderCard = button.closest('.order-card');
+        const isPreparing = orderCard.classList.contains('preparing');
+        
+        if (isPreparing) {
+            orderCard.classList.remove('preparing');
+            button.innerHTML = '<i class="fas fa-blender"></i> Prepare';
+        } else {
+            orderCard.classList.add('preparing');
+            button.innerHTML = '<i class="fas fa-pause"></i> Pause';
+        }
+        
+        updateOrderCounts();
+    }
+    
+    // Complete order
+    function completeOrder(button) {
+        const orderCard = button.closest('.order-card');
+        const orderId = orderCard.dataset.id;
+        
+        // Show completion animation
+        completionAnimation.style.display = 'block';
+        
+        // Hide animation after 2 seconds
+        setTimeout(function() {
+            completionAnimation.style.display = 'none';
+            
+            // Remove order card with animation
+            orderCard.classList.add('deleting');
+            
+            // Remove from DOM after animation completes
+            setTimeout(function() {
+                orderCard.remove();
+                updateOrderCounts();
+            }, 500);
+            
+        }, 1500);
+    }
+    
+    // Show cancel confirmation modal
+    function showCancelConfirmation(button) {
+        const orderCard = button.closest('.order-card');
+        const orderId = orderCard.dataset.id;
+        const tableNumber = orderCard.querySelector('.table-number').textContent;
+        
+        // Set message and order ID in modal
+        modalMessage.textContent = `Are you sure you want to cancel the order for ${tableNumber}? This action cannot be undone.`;
+        modalConfirm.dataset.orderId = orderId;
+        
+        // Show modal
+        confirmationModal.classList.add('active');
+    }
+    
+    // Cancel order
+    function cancelOrder(orderId) {
+        const orderCard = document.querySelector(`.order-card[data-id="${orderId}"]`);
+        
+        // Show cancellation animation
+        cancellationAnimation.style.display = 'block';
+        
+        // Hide animation after 2 seconds
+        setTimeout(function() {
+            cancellationAnimation.style.display = 'none';
+            
+            // Remove order card with animation
+            orderCard.classList.add('deleting');
+            
+            // Remove from DOM after animation completes
+            setTimeout(function() {
+                orderCard.remove();
+                updateOrderCounts();
+            }, 500);
+            
+        }, 1500);
+    }
+    
+    // Update order counts
+    function updateOrderCounts() {
+        const pendingOrders = document.querySelectorAll('#pending-orders .order-card:not(.deleting)').length;
+        const cashOrders = document.querySelectorAll('#cash-orders .order-card:not(.deleting)').length;
+        const preparingOrders = document.querySelectorAll('.order-card.preparing:not(.deleting)').length;
+        
+        pendingCount.textContent = pendingOrders;
+        cashCount.textContent = cashOrders;
+        preparingCount.textContent = preparingOrders;
+    }
+    
+    // Auto-update order times every minute
+    setInterval(updateOrderTimes, 60000);
+    
+    // Update order times display
+    function updateOrderTimes() {
+        const timeElements = document.querySelectorAll('.order-time');
+        
+        timeElements.forEach(function(el) {
+            const orderCard = el.closest('.order-card');
+            let time = parseInt(orderCard.dataset.time);
+            time += 1;
+            orderCard.dataset.time = time;
+            
+            el.innerHTML = `<i class="far fa-clock"></i> ${time} min ago`;
+        });
+        
+        // Re-sort orders after updating times
+        sortOrdersByTime();
+    }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Performance - Tasty Legs Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-red: #E4002B;
+      --dark-red: #C10024;
+      --dark: #231F20;
+      --light: #FFFFFF;
+      --yellow: #FFC72C;
+      --light-gray: #F5F5F5;
+      --medium-gray: #E0E0E0;
+      --dark-gray: #757575;
+      --success: #4CAF50;
+      --warning: #FF9800;
+      --info: #2196F3;
+      --sidebar-width: 250px;
+      --header-height: 56px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    /* Admin Header */
+    .admin-header {
+      background-color: var(--primary-red);
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: var(--header-height);
+    }
+
+    .menu-toggle.btn.btn-outline {
+      background-color: transparent !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      color: white !important;
+      margin-right: 10px;
+    }
+
+    .menu-toggle.btn.btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-color: white !important;
+    }
+
+    /* Admin Layout */
+    .admin-container {
+      display: flex;
+      min-height: calc(100vh - var(--header-height));
+      position: relative;
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: var(--sidebar-width);
+      background-color: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      padding: 15px 0;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      bottom: 0;
+      z-index: 900;
+      transform: translateX(-100%);
+    }
+
+    .admin-sidebar.active {
+      transform: translateX(0);
+    }
+
+    .admin-sidebar.collapsed {
+      width: 70px;
+    }
+
+    .admin-sidebar.collapsed .menu-item span {
+      display: none;
+    }
+
+    .admin-sidebar.collapsed .menu-item {
+      justify-content: center;
+    }
+
+    .admin-sidebar.collapsed .sidebar-header {
+      justify-content: center;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 0 15px 15px;
+      border-bottom: 1px solid var(--medium-gray);
+      margin-bottom: 15px;
+    }
+
+    .sidebar-header h3 {
+      font-size: 14px;
+      color: var(--dark-gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-left: 8px;
+    }
+
+    .sidebar-header i {
+      color: var(--dark-gray);
+      font-size: 16px;
+    }
+
+    .menu {
+      list-style: none;
+      padding: 0;
+    }
+
+    .menu-item {
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-item i {
+      color: var(--dark-gray);
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-item span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .menu-item:hover {
+      background-color: rgba(228, 0, 43, 0.1);
+      border-left-color: var(--primary-red);
+    }
+
+    .menu-item.active {
+      background-color: rgba(228, 0, 43, 0.1);
+      border-left-color: var(--primary-red);
+    }
+
+    .menu-item.active i,
+    .menu-item.active span {
+      color: var(--primary-red);
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+    }
+
+    .menu-item:hover .menu-link {
+      color: var(--primary-red);
+    }
+
+    .menu-item.active .menu-link {
+      color: var(--primary-red);
+    }
+    
+    /* Sidebar Overlay  */
+    .sidebar-overlay {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 800;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+      margin-left: 0;
+      padding: 30px;
+      transition: all 0.3s ease;
+      width: 100%;
+      background-color: #f5f7fa;
+      min-height: calc(100vh - var(--header-height));
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Category Navigation */
+    .category-nav {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .category-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--medium-gray);
+      background: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .category-btn.active {
+      background-color: var(--primary-red);
+      color: white;
+      border-color: var(--primary-red);
+    }
+
+    /* Category Title */
+    .category-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 25px 0 15px;
+      color: var(--dark);
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .category-title::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 60px;
+      height: 3px;
+      background-color: var(--primary-red);
+    }
+
+    /* Time Filters */
+    .time-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        position: sticky;
+        top: 55px; /* Position below the header */
+        z-index: 100;
+        background-color: #f5f7fa;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+      
+    .time-filters.hidden {
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+    }
+
+    .time-filter-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--medium-gray);
+      background: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .time-filter-btn.active {
+      background-color: var(--primary-red);
+      color: white;
+      border-color: var(--primary-red);
+    }
+
+    /* Item Cards Container */
+    .items-container {
+      position: relative;
+      margin-bottom: 30px;
+      display: none; /* Hidden by default */
+    }
+
+    .items-container.active {
+      display: block; /* Show when active */
+    }
+
+    .scroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: white;
+      border: 1px solid var(--medium-gray);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scroll-btn:hover {
+      background-color: var(--primary-red);
+      color: white;
+    }
+
+    .scroll-btn.left {
+      left: -20px;
+    }
+
+    .scroll-btn.right {
+      right: -20px;
+    }
+
+    .item-cards {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 10px 5px;
+      scroll-behavior: smooth;
+      -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+      scrollbar-width: none;  /* Hide scrollbar for Firefox */
+    }
+
+    .item-cards::-webkit-scrollbar {
+      display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+    }
+
+    .item-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      min-width: 280px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .item-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .item-card.active {
+      border: 2px solid var(--primary-red);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .item-details {
+      padding: 15px;
+    }
+
+    .item-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .units-sold {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-red);
+      margin-bottom: 5px;
+    }
+
+    .time-period {
+      font-size: 14px;
+      color: var(--dark-gray);
+    }
+
+    /* Item Chart Container */
+    .item-chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      display: none; /* Hidden by default */
+    }
+
+    .item-chart-container.active {
+      display: block; /* Show when active */
+    }
+
+    .chart-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .chart-title::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-red);
+    }
+
+    .chart {
+      height: 300px;
+    }
+
+    /* Ranking Table */
+    .ranking-container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .ranking-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .ranking-title::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-red);
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .ranking-table th {
+      background-color: var(--light-gray);
+      font-weight: 600;
+      position: sticky;
+      top: 115px; /* Header height + time filters height */
+      z-index: 50;
+    }
+
+    .ranking-table tr:hover {
+      background-color: var(--light-gray);
+    }
+
+    .rank {
+      font-weight: 700;
+      text-align: center;
+      width: 60px;
+    }
+
+    .rank-1 {
+      color: gold;
+    }
+
+    .rank-2 {
+      color: silver;
+    }
+
+    .rank-3 {
+      color: #cd7f32; /* Bronze */
+    }
+
+    
+
+    @media (max-width: 992px) {
+      .admin-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .admin-sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .main-content.expanded {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .scroll-btn {
+        display: none;
+      }
+      
+      .item-cards {
+        overflow-x: auto;
+      }
+      
+      .time-filters {
+        flex-wrap: wrap;
+      }
+
+      .ranking-table {
+        font-size: 14px;
+      }
+
+      .ranking-table th,
+      .ranking-table td {
+        padding: 8px 10px;
+      }
+      
+      .main-content {
+        padding: 15px;
+      }
+      
+      .ranking-table th {
+        top: 130px; /* Adjust for mobile */
+      }
+      
+      .category-nav {
+        gap: 8px;
+      }
+      
+      .category-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="d-flex align-items-center">
+      <button class="menu-toggle btn btn-outline" id="menuToggle" style="margin-right: 10px;">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo">
+        <i class="fas fa-utensils"></i>
+        <span>Tasty Legs Admin</span>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Admin Container -->
+  <div class="admin-container">
+    <!-- Sidebar Overlay (Mobile Only) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <i class="fas fa-store"></i>
+        <h3>Restaurant</h3>
+      </div>
+      <ul class="menu">
+        <li class="menu-item">
+          <a href="#" class="menu-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#" class="menu-link">
+            <i class="fas fa-utensils"></i>
+            <span>Menu Management</span>
+          </a>
+        </li>
+        <li class="menu-item active">
+            <a href="#" class="menu-link">
+              <i class="fas fa-utensils"></i>
+              <span>Product Sales Performance</span>
+            </a>
+          </li>
+        <li class="menu-item">
+          <a href="#" class="menu-link">
+            <i class="fas fa-chart-line"></i>
+            <span>Activity Logs</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <!-- Content Wrapper -->
+      <div class="content-wrapper">
+        <!-- Category Navigation -->
+        <div class="category-nav">
+          <button class="category-btn active" data-category="chicken-buckets">Chicken Buckets</button>
+          <button class="category-btn" data-category="burgers-wraps">Burgers & Wraps</button>
+          <button class="category-btn" data-category="rice-meals">Rice & Meals</button>
+          <button class="category-btn" data-category="sides-snacks">Sides & Snacks</button>
+          <button class="category-btn" data-category="desserts">Desserts</button>
+        </div>
+
+        <!-- Time Filters -->
+        <div class="time-filters" id="timeFilters">
+          <button class="time-filter-btn active" data-period="today">Today</button>
+          <button class="time-filter-btn" data-period="week">This Week</button>
+          <button class="time-filter-btn" data-period="month">This Month</button>
+        </div>
+
+        <!-- Chicken Buckets Category -->
+        <div class="items-container active" id="chicken-buckets-container">
+          <button class="scroll-btn left" onclick="scrollItems('chicken-buckets', -1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="item-cards" id="chicken-buckets">
+            <!-- Item 1 -->
+            <div class="item-card" data-item="crispy-chicken-bucket">
+              <img src="https://images.unsplash.com/photo-1606755962773-d324e0a13086?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Crispy Chicken Bucket" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Crispy Chicken Bucket</div>
+                <div class="units-sold" id="crispy-bucket-today">38 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="item-card" data-item="spicy-chicken-bucket">
+              <img src="https://images.unsplash.com/photo-1594007654729-407eedc4fe0f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Spicy Chicken Bucket" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Spicy Chicken Bucket</div>
+                <div class="units-sold" id="spicy-bucket-today">32 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="item-card" data-item="original-recipe-bucket">
+              <img src="https://images.unsplash.com/photo-1562967914-608f82629710?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Original Recipe Bucket" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Original Recipe Bucket</div>
+                <div class="units-sold" id="original-bucket-today">45 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="item-card" data-item="family-feast-bucket">
+              <img src="https://images.unsplash.com/photo-1527477391315-e6ad4f2b67df?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Family Feast Bucket" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Family Feast Bucket</div>
+                <div class="units-sold">28 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="item-card" data-item="party-bucket">
+              <img src="https://images.unsplash.com/photo-1559715745-e1b33a271c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Party Bucket" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Party Bucket</div>
+                <div class="units-sold">22 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="scroll-btn right" onclick="scrollItems('chicken-buckets', 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Item Chart for Chicken Buckets -->
+        <div class="item-chart-container" id="chicken-buckets-chart">
+          <div class="chart-title">Sales Trend - <span id="selected-item-name">Crispy Chicken Bucket</span></div>
+          <div class="chart">
+            <canvas id="chickenBucketsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Burgers & Wraps Category -->
+        <div class="items-container" id="burgers-wraps-container">
+          <button class="scroll-btn left" onclick="scrollItems('burgers-wraps', -1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="item-cards" id="burgers-wraps">
+            <!-- Item 1 -->
+            <div class="item-card" data-item="zinger-burger">
+              <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Zinger Burger" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Zinger Burger</div>
+                <div class="units-sold" id="zinger-today">42 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="item-card" data-item="cheeseburger">
+              <img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Cheeseburger" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Cheeseburger</div>
+                <div class="units-sold">35 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="item-card" data-item="bacon-burger">
+              <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Bacon Burger" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Bacon Burger</div>
+                <div class="units-sold">28 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="item-card" data-item="chicken-wrap">
+              <img src="https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Chicken Wrap" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Chicken Wrap</div>
+                <div class="units-sold">32 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="item-card" data-item="veggie-wrap">
+              <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Veggie Wrap" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Veggie Wrap</div>
+                <div class="units-sold">25 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="scroll-btn right" onclick="scrollItems('burgers-wraps', 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Item Chart for Burgers & Wraps -->
+        <div class="item-chart-container" id="burgers-wraps-chart">
+          <div class="chart-title">Sales Trend - <span id="selected-burger-name">Zinger Burger</span></div>
+          <div class="chart">
+            <canvas id="burgersWrapsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Rice & Meals Category -->
+        <div class="items-container" id="rice-meals-container">
+          <button class="scroll-btn left" onclick="scrollItems('rice-meals', -1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="item-cards" id="rice-meals">
+            <!-- Item 1 -->
+            <div class="item-card" data-item="chicken-rice-meal">
+              <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Chicken Rice Meal" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Chicken Rice Meal</div>
+                <div class="units-sold">38 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="item-card" data-item="fried-rice-combo">
+              <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Fried Rice Combo" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Fried Rice Combo</div>
+                <div class="units-sold">32 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="item-card" data-item="bbq-rice-bowl">
+              <img src="https://images.unsplash.com/photo-1551632812-8737b6a3ed16?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="BBQ Rice Bowl" class="item-image">
+              <div class="item-details">
+                <div class="item-name">BBQ Rice Bowl</div>
+                <div class="units-sold">25 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="item-card" data-item="family-meal-deal">
+              <img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Family Meal Deal" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Family Meal Deal</div>
+                <div class="units-sold">18 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="item-card" data-item="grilled-chicken-meal">
+              <img src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Grilled Chicken Meal" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Grilled Chicken Meal</div>
+                <div class="units-sold">30 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="scroll-btn right" onclick="scrollItems('rice-meals', 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Item Chart for Rice & Meals -->
+        <div class="item-chart-container" id="rice-meals-chart">
+          <div class="chart-title">Sales Trend - <span id="selected-rice-name">Chicken Rice Meal</span></div>
+          <div class="chart">
+            <canvas id="riceMealsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Sides & Snacks Category -->
+        <div class="items-container" id="sides-snacks-container">
+          <button class="scroll-btn left" onclick="scrollItems('sides-snacks', -1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="item-cards" id="sides-snacks">
+            <!-- Item 1 -->
+            <div class="item-card" data-item="french-fries">
+              <img src="https://images.unsplash.com/photo-1586816001966-79b736744398?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="French Fries" class="item-image">
+              <div class="item-details">
+                <div class="item-name">French Fries</div>
+                <div class="units-sold">58 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="item-card" data-item="onion-rings">
+              <img src="https://images.unsplash.com/photo-1612927601601-6638404737ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Onion Rings" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Onion Rings</div>
+                <div class="units-sold">29 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="item-card" data-item="chicken-wings">
+              <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Chicken Wings" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Chicken Wings</div>
+                <div class="units-sold">36 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="item-card" data-item="mozzarella-sticks">
+              <img src="https://images.unsplash.com/photo-1559484460-c17268c5a038?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Mozzarella Sticks" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Mozzarella Sticks</div>
+                <div class="units-sold">24 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="item-card" data-item="corn-on-the-cob">
+              <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Corn on the Cob" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Corn on the Cob</div>
+                <div class="units-sold">20 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="scroll-btn right" onclick="scrollItems('sides-snacks', 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Item Chart for Sides & Snacks -->
+        <div class="item-chart-container" id="sides-snacks-chart">
+          <div class="chart-title">Sales Trend - <span id="selected-side-name">French Fries</span></div>
+          <div class="chart">
+            <canvas id="sidesSnacksChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Desserts Category -->
+       
+        <div class="items-container" id="desserts-container">
+          <button class="scroll-btn left" onclick="scrollItems('desserts', -1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="item-cards" id="desserts">
+            <!-- Item 1 -->
+            <div class="item-card" data-item="ice-cream">
+              <img src="https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Ice Cream" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Ice Cream</div>
+                <div class="units-sold">40 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="item-card" data-item="donuts">
+              <img src="https://images.unsplash.com/photo-1559715745-e1b33a271c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Donuts" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Donuts</div>
+                <div class="units-sold">32 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="item-card" data-item="chocolate-shake">
+              <img src="https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Chocolate Shake" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Chocolate Shake</div>
+                <div class="units-sold">27 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="item-card" data-item="apple-pie">
+              <img src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Apple Pie" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Apple Pie</div>
+                <div class="units-sold">22 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="item-card" data-item="chocolate-cake">
+              <img src="https://images.unsplash.com/photo-1483695028939-5bb13f8648b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                   alt="Chocolate Cake" class="item-image">
+              <div class="item-details">
+                <div class="item-name">Chocolate Cake</div>
+                <div class="units-sold">18 units</div>
+                <div class="time-period">Sold today</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="scroll-btn right" onclick="scrollItems('desserts', 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Item Chart for Desserts -->
+        <div class="item-chart-container" id="desserts-chart">
+          <div class="chart-title">Sales Trend - <span id="selected-dessert-name">Ice Cream</span></div>
+          <div class="chart">
+            <canvas id="dessertsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Ranking Table -->
+        <div class="ranking-container">
+          <div class="ranking-title">Sales Ranking</div>
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th class="rank">Rank</th>
+                <th>Item</th>
+                <th>Today</th>
+                <th>This Week</th>
+                <th>This Month</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody">
+              <!-- Table content will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle Sidebar
+    const menuToggle = document.getElementById('menuToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+  
+    // Toggle sidebar when clicking 3-bars
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      adminSidebar.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
+    });
+  
+    // Close when clicking overlay
+    sidebarOverlay.addEventListener('click', () => {
+      adminSidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    });
+  
+    // Close when clicking anywhere outside sidebar
+    document.addEventListener('click', (e) => {
+      if (
+        !adminSidebar.contains(e.target) &&
+        !menuToggle.contains(e.target) &&
+        adminSidebar.classList.contains('active')
+      ) {
+        adminSidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+    // Sample data for different time periods
+    const salesData = {
+      today: {
+        zinger: 42,
+        chicken: 38,
+        pizza: 25,
+        cheeseburger: 35,
+        fries: 58,
+        margherita: 22,
+        friedchicken: 45,
+        donuts: 32,
+        baconburger: 28,
+        icecream: 40,
+        wings: 36,
+        onionrings: 29,
+        shakes: 27,
+        crispybucket: 38,
+        spicybucket: 32,
+        originalbucket: 45,
+        familybucket: 28,
+        partybucket: 22,
+        chickenwrap: 32,
+        veggiewrap: 25,
+        chickenrice: 38,
+        friedrice: 32,
+        bbqbowl: 25,
+        familydeal: 18,
+        grilledmeal: 30,
+        mozzasticks: 24,
+        corncob: 20,
+        applepie: 22,
+        choccake: 18,
+        labels: ['10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm'],
+        values: [3, 5, 8, 10, 6, 4, 3, 5, 4, 2]
+      },
+      week: {
+        zinger: 210,
+        chicken: 185,
+        pizza: 145,
+        cheeseburger: 175,
+        fries: 290,
+        margherita: 110,
+        friedchicken: 225,
+        donuts: 160,
+        baconburger: 140,
+        icecream: 200,
+        wings: 180,
+        onionrings: 145,
+        shakes: 135,
+        crispybucket: 190,
+        spicybucket: 160,
+        originalbucket: 225,
+        familybucket: 140,
+        partybucket: 110,
+        chickenwrap: 160,
+        veggiewrap: 125,
+        chickenrice: 190,
+        friedrice: 160,
+        bbqbowl: 125,
+        familydeal: 90,
+        grilledmeal: 150,
+        mozzasticks: 120,
+        corncob: 100,
+        applepie: 110,
+        choccake: 90,
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        values: [35, 28, 32, 30, 42, 45, 38]
+      },
+      month: {
+        zinger: 850,
+        chicken: 720,
+        pizza: 620,
+        cheeseburger: 700,
+        fries: 1160,
+        margherita: 440,
+        friedchicken: 900,
+        donuts: 640,
+        baconburger: 560,
+        icecream: 800,
+        wings: 720,
+        onionrings: 580,
+        shakes: 540,
+        crispybucket: 760,
+        spicybucket: 640,
+        originalbucket: 900,
+        familybucket: 560,
+        partybucket: 440,
+        chickenwrap: 640,
+        veggiewrap: 500,
+        chickenrice: 760,
+        friedrice: 640,
+        bbqbowl: 500,
+        familydeal: 360,
+        grilledmeal: 600,
+        mozzasticks: 480,
+        corncob: 400,
+        applepie: 440,
+        choccake: 360,
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        values: [210, 225, 205, 210]
+      }
+    };
+
+    // Item-specific chart data
+    const itemChartData = {
+      'crispy-chicken-bucket': {
+        today: [2, 3, 5, 7, 4, 3, 2, 4, 3, 1],
+        week: [25, 20, 28, 22, 30, 35, 30],
+        month: [180, 190, 195, 195]
+      },
+      'spicy-chicken-bucket': {
+        today: [1, 2, 4, 6, 3, 3, 2, 4, 4, 3],
+        week: [20, 18, 25, 20, 28, 32, 25],
+        month: [150, 160, 165, 165]
+      },
+      'original-recipe-bucket': {
+        today: [3, 4, 6, 8, 5, 4, 3, 5, 4, 3],
+        week: [30, 25, 32, 28, 35, 40, 35],
+        month: [210, 225, 230, 235]
+      },
+      'zinger-burger': {
+        today: [3, 4, 6, 8, 5, 4, 3, 4, 3, 2],
+        week: [30, 25, 32, 28, 35, 40, 35],
+        month: [200, 210, 220, 220]
+      },
+      'cheeseburger': {
+        today: [2, 3, 5, 7,  4, 3, 2, 4, 3, 2],
+        week: [25, 20, 28, 22, 30, 35, 25],
+        month: [170, 175, 180, 175]
+      },
+      'chicken-rice-meal': {
+        today: [2, 3, 5, 7, 4, 3, 2, 4, 3, 1],
+        week: [25, 20, 28, 22, 30, 35, 30],
+        month: [180, 190, 195, 195]
+      },
+      'french-fries': {
+        today: [4, 5, 8, 10, 6, 5, 4, 6, 5, 3],
+        week: [40, 35, 45, 38, 50, 55, 45],
+        month: [280, 290, 295, 295]
+      },
+      'ice-cream': {
+        today: [3, 4, 6, 8, 5, 4, 3, 4, 3, 2],
+        week: [30, 25, 32, 28, 35, 40, 35],
+        month: [190, 200, 205, 205]
+      }
+    };
+
+    // Initialize charts for each category
+    let chickenBucketsChart = null;
+    let burgersWrapsChart = null;
+    let riceMealsChart = null;
+    let sidesSnacksChart = null;
+    let dessertsChart = null;
+
+    function initCharts() {
+      const chickenCtx = document.getElementById('chickenBucketsChart').getContext('2d');
+      chickenBucketsChart = new Chart(chickenCtx, {
+        type: 'bar',
+        data: {
+          labels: salesData.today.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: itemChartData['crispy-chicken-bucket'].today,
+            backgroundColor: 'rgba(228, 0, 43, 0.7)',
+            borderColor: 'rgba(228, 0, 43, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const burgersCtx = document.getElementById('burgersWrapsChart').getContext('2d');
+      burgersWrapsChart = new Chart(burgersCtx, {
+        type: 'bar',
+        data: {
+          labels: salesData.today.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: itemChartData['zinger-burger'].today,
+            backgroundColor: 'rgba(228, 0, 43, 0.极速赛车开奖直播 7)',
+            borderColor: 'rgba(228, 0, 43, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const riceCtx = document.getElementById('riceMealsChart').getContext('2d');
+      riceMealsChart = new Chart(riceCtx, {
+        type: 'bar',
+        data: {
+          labels: salesData.today.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: itemChartData['chicken-rice-meal'].today,
+            backgroundColor: 'rgba(228, 0, 43, 0.7)',
+            borderColor: 'rgba(228, 0, 43, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const sidesCtx = document.getElementById('sidesSnacksChart').getContext('2d');
+      sidesSnacksChart = new Chart(sidesCtx, {
+        type: 'bar',
+        data: {
+          labels: salesData.today.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: itemChartData['french-fries'].today,
+            backgroundColor: 'rgba(228, 0, 43, 0.7)',
+            borderColor: 'rgba(228, 极速赛车开奖直播 0, 43, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const dessertsCtx = document.getElementById('dessertsChart').getContext('2d');
+      dessertsChart = new Chart(dessertsCtx, {
+        type: 'bar',
+        data: {
+          labels: salesData.today.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: itemChartData['ice-cream'].today,
+            backgroundColor: 'rgba(228, 0, 43, 0.7)',
+            borderColor: 'rgba(228, 0, 43, 1)',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    // Category navigation functionality
+    document.querySelectorAll('.category-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        // Update active button
+        document.querySelectorAll('.category-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        const category = this.dataset.category;
+        
+        // Hide all category containers
+        document.querySelectorAll('.items-container').forEach(container => {
+          container.classList.remove('active');
+        });
+        
+        // Hide all charts
+        document.querySelectorAll('.item-chart-container').forEach(chart => {
+          chart.classList.remove('active');
+        });
+        
+        // Show selected category
+        document.getElementById(`${category}-container`).classList.add('active');
+      });
+    });
+
+    // Item selection functionality
+    document.querySelectorAll('.item-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const itemId = this.dataset.item;
+        const category = this.closest('.items-container').id.replace('-container', '');
+        const itemName = this.querySelector('.item-name').textContent;
+        
+        // Remove active class from all items in this category
+        this.closest('.item-cards').querySelectorAll('.item-card').forEach(item => {
+          item.classList.remove('active');
+        });
+        
+        // Add active class to selected item
+        this.classList.add('active');
+        
+        // Show the chart for this category
+        document.getElementById(`${category}-chart`).classList.add('active');
+        
+        // Update chart title with selected item name
+        document.querySelector(`#${category}-chart .chart-title span`).textContent = itemName;
+        
+        // Update chart data based on selected item and current time period
+        updateItemChart(category, itemId);
+      });
+    });
+
+    // Update item chart based on selected item and time period
+    function updateItemChart(category, itemId) {
+      const period = document.querySelector('.time-filter-btn.active').dataset.period;
+      const chart = getChartByCategory(category);
+      
+      if (chart && itemChartData[itemId]) {
+        chart.data.labels = salesData[period].labels;
+        chart.data.datasets[0].data = itemChartData[itemId][period];
+        chart.update();
+      }
+    }
+
+    // Get chart instance by category
+    function getChartByCategory(category) {
+      switch(category) {
+        case 'chicken-buckets': return chickenBucketsChart;
+        case 'burgers-wraps': return burgersWrapsChart;
+        case 'rice-meals': return riceMealsChart;
+        case 'sides-snacks': return sidesSnacksChart;
+        case 'desserts': return dessertsChart;
+        default: return null;
+      }
+    }
+
+    // Time filter functionality
+    document.querySelectorAll('.极速赛车开奖直播 time-filter-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        // Update active button
+        document.querySelectorAll('.time-filter-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        const period = this.dataset.period;
+        const periodText = period === 'today' ? 'today' : 
+                          period === 'week' ? 'this week' : 'this month';
+        
+        // Update item cards
+        document.getElementById('zinger-today').textContent = 
+          `${salesData[period].zinger} units`;
+        document.getElementById('crispy-bucket-today').textContent = 
+          `${salesData[period].crispybucket} units`;
+        document.getElementById('spicy-bucket-today').textContent = 
+          `${salesData[period].spicybucket} units`;
+        document.getElementById('original-bucket-today').textContent = 
+          `${salesData[period].originalbucket} units`;
+        
+        // Update time period text
+        document.querySelectorAll('.time-period').forEach(el => {
+          el.textContent = `Sold ${periodText}`;
+        });
+        
+        // Update active item chart if there is one
+        const activeItem = document.querySelector('.item-card.active');
+        if (activeItem) {
+          const itemId = activeItem.dataset.item;
+          const category = activeItem.closest('.items-container').id.replace('-container', '');
+          updateItemChart(category, itemId);
+        }
+        
+        // Update ranking table
+        generateRankingTable(period);
+      });
+    });
+
+    // Scroll functionality for each category
+    function scrollItems(categoryId, direction) {
+      const container = document.getElementById(categoryId);
+      const scrollAmount = 300; // Adjust this value as needed
+      
+      if (direction > 0) {
+        // Scroll right
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      } else {
+        // Scroll left
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      }
+    }
+
+    // Generate ranking table
+    function generateRankingTable(period = 'today') {
+      const items = [
+        { name: 'Zinger Burger', today: salesData.today.zinger, week: salesData.week.zinger, month: salesData.month.zinger },
+        { name: 'French Fries', today: salesData.today.fries, week: salesData.week.fries, month: salesData.month.fries },
+        { name: 'Original Recipe Bucket', today: salesData.today.originalbucket, week: salesData.week.originalbucket, month: salesData.month.originalbucket },
+        { name: 'Crispy Chicken Bucket', today: salesData.today.crispybucket, week: salesData. week.crispybucket, month: salesData.month.crispybucket },
+        { name: 'Ice Cream', today: salesData.today.icecream, week: salesData.week.icecream, month: salesData.month.icecream },
+        { name: 'Chicken Wings', today: salesData.today.wings, week: salesData.week.wings, month: salesData.month.wings },
+        { name: 'Cheeseburger', today: salesData.today.cheeseburger, week: salesData.week.cheeseburger, month: salesData.month.cheeseburger },
+        { name: 'Donuts', today: salesData.today.donuts, week: salesData.week.donuts, month: salesData.month. donuts },
+        { name: 'Spicy Chicken Bucket', today: salesData.today.spicybucket, week: salesData.week.spicybucket, month: salesData.month.spicybucket },
+        { name: 'Onion Rings', today: salesData.today.onionrings, week: salesData.week.onionrings, month: salesData.month.onionrings },
+        { name: 'Grilled Chicken Meal', today: salesData.today.grilledmeal, week: salesData.week.grilledmeal, month: salesData.month.grilledmeal },
+        { name: 'Chocolate Shake', today: salesData.today.shakes, week: salesData.week.shakes, month: salesData.month.shakes },
+        { name: '极速赛车开奖直播 Chicken Wrap', today: salesData.today.chickenwrap, week: salesData.week.chickenwrap, month: salesData.month.chickenwrap },
+        { name: 'Family Feast Bucket', today: salesData.today.familybucket, week: salesData.week.familybucket, month: salesData.month.familybucket },
+        { name: 'BBQ Rice Bowl', today: salesData.today.bbqbowl, week: salesData.week.bbqbowl, month: salesData.month.bbqbowl }
+      ];
+
+      // Sort by selected period's sales (descending)
+      const periodKey = period === 'today' ? 'today' : period === 'week' ? 'week' : 'month';
+      items.sort((a, b) => b[periodKey] - a[periodKey]);
+      
+      const tableBody = document.getElementById('rankingBody');
+      tableBody.innerHTML = '';
+      
+      items.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const rankClass = index < 3 ? `rank-${index + 1}` : '';
+        
+        row.innerHTML = `
+          <td class="rank ${rankClass}">${index + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.today} units</td>
+          <td>${item.week} units</td>
+          <td>${item.month} units</td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Initialize the page
+    function initPage() {
+      initCharts();
+      generateRankingTable();
+      
+      // Show only the first category by default
+      document.querySelectorAll('.items-container').forEach((container, index) => {
+        if (index !== 0) {
+          container.classList.remove('active');
+        }
+      });
+    }
+
+    // Initialize the page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

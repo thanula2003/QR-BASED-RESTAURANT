@@ -3,82 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant - Pending Orders</title>
+    <title>Restaurant - Order Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-red: rgb(233, 233, 233);      /* KFC Red - primary color */
+            --dark-red: #C10024;         /* Darker red - for accents */
+            --dark: #231F20;             /* Dark text - almost black */
+            --light: #FFFFFF;            /* White - for backgrounds */
+            --yellow: #FFC72C;           /* KFC Yellow - for highlights */
+            --success: #4CAF50;          /* Green - for success states */
+            --warning: #FF9800;          /* Orange - for warnings */
+            --danger: #E4002B;           /* Red - for danger/errors (using KFC red) */
+            --gray-light: #F5F5F5;       /* Light gray */
+            --gray-medium: #E0E0E0;      /* Medium gray */
+            --gray-dark: #757575;        /* Dark gray */
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --kfc-red: #E4002B;
+            --kfc-dark: #231F20;
+            --kfc-light: #FFFFFF;
+            --kfc-yellow: #FFC72C;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
         
         body {
-            background-color: #f8f9fa;
-            color: #333;
-            padding: 20px;
+            background: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 0;
+            line-height: 1.5;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .app-container {
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
         }
         
-        header {
+        /* Updated Sidebar to match activity-logs.php theme */
+        .header {
+            background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+            color: var(--dark);
+            width: 280px;
+            min-height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 25px 0;
+            overflow-y: auto;
+            height: 100vh;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+            border-right: 2px solid var(--gray-medium); /* Changed to grey */
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--gray-medium);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--kfc-dark);
+        }
+        
+        .logo i {
+            color: var(--kfc-red);
+        }
+        
+        .nav-stats {
+            display: flex;
+            flex-direction: column;
+            overflow-x: visible;
+            padding: 0 20px;
+            gap: 15px;
+        }
+        
+        .nav-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(228, 0, 43, 0.08);
+            border-radius: var(--border-radius);
+            min-width: auto;
+            border-left: 4px solid transparent;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .nav-stat:hover {
+            background-color: rgba(228, 0, 43, 0.12);
+            border-left-color: var(--kfc-red);
+        }
+        
+        .nav-stat.active {
+            background-color: rgba(228, 0, 43, 0.15);
+            border-left-color: var(--kfc-red);
+        }
+        
+        .nav-stat i {
+            font-size: 1.3rem;
+            width: 30px;
+            text-align: center;
+            color: var(--kfc-red);
+        }
+        
+        .nav-stat-content h3 {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+            margin-bottom: 4px;
+        }
+        
+        .nav-stat-content p {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--kfc-dark);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #ff6b6b;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        h1 {
-            color: #e63946;
-            font-size: 2.5rem;
-        }
-        
-        .stats {
+        .content-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
             display: flex;
-            gap: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            gap: 10px;
         }
         
-        .stat-box {
-            text-align: center;
-            padding: 10px 20px;
-        }
-        
-        .stat-box h3 {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        
-        .stat-box p {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #e63946;
-        }
-        
-        .orders-grid {
+        /* Orders Container */
+        .orders-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
         }
         
         .order-card {
             background: white;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
+            border-color: blue;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s ease;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
+            border-top: 5px solid var(--success); /* Changed to green for pending paid */
+        }
+        
+        .order-card.cash {
+            border-top-color: var(--yellow);
+        }
+        
+        .order-card.preparing {
+            border-top-color: var(--danger); /* Changed to red for preparing state */
         }
         
         .order-card.deleting {
@@ -90,43 +198,114 @@
         }
         
         .order-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
         
         .card-header {
-            background: #e63946;
-            color: white;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            background: var(--gray-light);
+            border-bottom: 1px solid var(--gray-medium);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .header-content {
+            flex: 1;
+            min-width: 180px;
         }
         
         .table-number {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .order-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .order-code {
+            font-size: 0.8rem;
+            background: var(--gray-medium);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .payment-status {
+            font-size: 0.8rem;
+            background: var(--success); /* Changed to green */
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .order-card.cash .payment-status {
+            background: var(--yellow);
+            color: var(--dark);
+        }
+        
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .btn-cancel-header {
+            background: var(--gray-medium);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
             font-weight: bold;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+        }
+        
+        .btn-cancel-header:hover {
+            background: var(--danger);
+            color: white;
+            transform: rotate(90deg);
         }
         
         .order-time {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .card-body {
-            padding: 15px;
+            padding: 20px;
             flex-grow: 1;
         }
         
         .order-items {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         
         .order-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #eee;
-            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--gray-medium);
         }
         
         .item-details {
@@ -134,462 +313,890 @@
         }
         
         .item-name {
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+            font-size: 0.95rem;
         }
         
         .item-amount {
-            color: #6c757d;
-            font-size: 0.85rem;
+            color: var(--gray-dark);
+            font-size: 0.8rem;
         }
         
         .item-price {
             flex: 1;
             text-align: right;
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
         }
         
         .order-total {
             display: flex;
             justify-content: space-between;
-            font-size: 1.1rem;
-            font-weight: bold;
-            padding-top: 10px;
-            border-top: 2px solid #ff6b6b;
+            font-size: 1rem;
+            font-weight: 700;
+            padding-top: 12px;
+            border-top: 2px solid var(--gray-medium);
+            color: var(--dark);
         }
         
         .card-footer {
-            padding: 12px 15px;
-            background: #f8f9fa;
+            padding: 15px 20px;
+            background: var(--gray-light);
             display: flex;
             justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .btn {
-            padding: 6px 12px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
         }
         
         .btn-prepare {
-            background: #ff9e1b;
+            background: var(--warning);
             color: white;
         }
         
+        .btn-prepare.preparing {
+            background: var(--danger); /* Changed to red for preparing state */
+        }
+        
         .btn-prepare:hover {
-            background: #ff8c00;
+            background: #e68900;
+        }
+        
+        .btn-prepare.preparing:hover {
+            background: #c10024; /* Darker red on hover for preparing state */
         }
         
         .btn-complete {
-            background: #2a9d8f;
+            background: var(--success);
             color: white;
         }
         
         .btn-complete:hover {
-            background: #21867a;
+            background: #3d8b40;
         }
         
+        /* Animations */
         .completion-animation {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(42, 157, 143, 0.9);
+            background: rgba(76, 175, 80, 0.95);
             color: white;
-            padding: 30px 50px;
-            border-radius: 10px;
-            font-size: 2rem;
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            font-size: 1.5rem;
             font-weight: bold;
             z-index: 1000;
             display: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: fadeInOut 1.5s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeInOut 1.5s ease forwards;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            30% { transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+        
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(-20px) scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        
+        .confirmation-modal.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            color: var(--danger);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-message {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        
+        .modal-btn-confirm {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background: var(--dark-red);
+        }
+        
+        .modal-btn-cancel {
+            background: var(--gray-medium);
+            color: var(--dark);
+        }
+        
+        .modal-btn-cancel:hover {
+            background: var(--gray-dark);
+            color: white;
+        }
+        
+        .cancellation-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(228, 0, 43, 0.95);
+            color: white;
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeInOut 1.5s ease forwards;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .checkmark {
             display: inline-block;
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: white;
-            color: #2a9d8f;
-            font-size: 60px;
-            line-height: 80px;
+            color: var(--success);
+            font-size: 35px;
+            line-height: 50px;
             text-align: center;
-            margin-right: 15px;
+            margin-right: 10px;
         }
         
-        @media (max-width: 1200px) {
-            .orders-grid {
-                grid-template-columns: repeat(2, 1fr);
+        .crossmark {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            color: var(--danger);
+            font-size: 35px;
+            line-height: 50px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        @keyframes fadeInOut {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.8); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.1); 
+            }
+            30% { 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            80% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(1.2);
             }
         }
         
-        @media (max-width: 768px) {
-            .orders-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            header {
+        /* Mobile styles */
+        @media (max-width: 992px) {
+            .app-container {
                 flex-direction: column;
-                text-align: center;
-                gap: 20px;
             }
             
-            .stats {
+            .header {
                 width: 100%;
+                min-height: auto;
+                height: auto;
+                position: sticky;
+                padding: 15px 20px;
+                border-right: none;
+                border-bottom: 2px solid var(--gray-medium);
             }
             
-            .completion-animation {
-                padding: 20px 30px;
+            .logo {
+                padding: 0 0 15px;
+                margin-bottom: 15px;
+            }
+            
+            .logo h1 {
                 font-size: 1.5rem;
             }
             
-            .checkmark {
-                width: 60px;
-                height: 60px;
-                font-size: 40px;
-                line-height: 60px;
+            .nav-stats {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                gap: 12px;
+            }
+            
+            .nav-stat {
+                min-width: 120px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .orders-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .content-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .card-header {
+                padding: 16px;
+            }
+            
+            .card-body {
+                padding: 16px;
+            }
+            
+            .card-footer {
+                padding: 12px 16px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .card-footer {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-utensils"></i> Pending Orders</h1>
-            <div class="stats">
-                <div class="stat-box">
-                    <h3>Pending Orders</h3>
-                    <p id="order-count">8</p>
+    <div class="app-container">
+        <!-- Updated Sidebar to match activity-logs.php theme -->
+        <div class="header">
+            <div class="logo">
+                <h1><i class="fas fa-utensils"></i> RESTAURANT ORDERS</h1>
+            </div>
+            
+            <div class="nav-stats">
+                <div class="nav-stat pending-stat" id="nav-pending-paid">
+                    <i class="fas fa-hourglass-half"></i>
+                    <div class="nav-stat-content">
+                        <h3>Pending Paid</h3>
+                        <p id="pending-count">3</p>
+                    </div>
+                </div>
+                
+                <div class="nav-stat cash-stat" id="nav-pending-cash">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div class="nav-stat-content">
+                        <h3>Pending Cash</h3>
+                        <p id="cash-count">5</p>
+                    </div>
+                </div>
+                
+                <div class="nav-stat preparing-stat" id="nav-pending-prep">
+                    <i class="fas fa-utensils"></i>
+                    <div class="nav-stat-content">
+                        <h3>Pending Prep</h3>
+                        <p id="preparing-count">0</p>
+                    </div>
                 </div>
             </div>
-        </header>
+        </div>
         
-        <div class="orders-grid" id="orders-container">
-            <!-- Order 1 -->
-            <div class="order-card" data-id="1">
-                <div class="card-header">
-                    <div class="table-number">Table #5</div>
-                    <div class="order-time">12 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Margherita Pizza</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$22.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Caesar Salad</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$9.50</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Sparkling Water</div>
-                                <div class="item-amount">Amount: 3</div>
-                            </div>
-                            <div class="item-price">$9.00</div>
-                        </div>
-                    </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$40.50</div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
-                </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Cash on Table Orders Section -->
+            <div class="content-header" id="cash-section">
+                <h2><i class="fas fa-money-bill-wave"></i> Cash on Table Orders</h2>
             </div>
             
-            <!-- Order 2 -->
-            <div class="order-card" data-id="2">
-                <div class="card-header">
-                    <div class="table-number">Table #12</div>
-                    <div class="order-time">8 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Beef Burger</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$24.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">French Fries</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$10.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Chocolate Shake</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$6.50</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Onion Rings</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$8.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Grilled Chicken Sandwich</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$12.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Iced Tea</div>
-                                <div class="item-amount">Amount: 3</div>
-                            </div>
-                            <div class="item-price">$9.00</div>
-                        </div>
-                    </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$69.50</div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
-                </div>
+            <div class="orders-container" id="cash-orders">
+                <!-- Cash orders will be displayed here -->
             </div>
             
-            <!-- Order 3 -->
-            <div class="order-card" data-id="3">
-                <div class="card-header">
-                    <div class="table-number">Table #8</div>
-                    <div class="order-time">5 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Grilled Salmon</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$18.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Mashed Potatoes</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$5.50</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">House Salad</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$7.00</div>
-                        </div>
-                    </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$30.50</div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
-                </div>
+            <!-- Pending Orders Section -->
+            <div class="content-header" id="pending-section">
+                <h2><i class="fas fa-clock"></i> Pending Orders</h2>
             </div>
             
-            <!-- Order 4 -->
-            <div class="order-card" data-id="4">
-                <div class="card-header">
-                    <div class="table-number">Takeaway #3</div>
-                    <div class="order-time">15 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Chicken Alfredo Pasta</div>
-                                <div class="item-amount">Amount: 3</div>
-                            </div>
-                            <div class="item-price">$36.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Garlic Bread</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$8.00</div>
-                        </div>
-                    </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$44.00</div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
-                </div>
+            <div class="orders-container" id="pending-orders">
+                <!-- Pending orders will be displayed here -->
             </div>
             
-            <!-- Order 5 -->
-            <div class="order-card" data-id="5">
-                <div class="card-header">
-                    <div class="table-number">Table #10</div>
-                    <div class="order-time">18 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Prime Rib Steak</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$48.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Baked Potato</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$10.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Red Wine</div>
-                                <div class="item-amount">Amount: 1</div>
-                            </div>
-                            <div class="item-price">$12.00</div>
-                        </div>
-                    </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$70.00</div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
-                </div>
+            <!-- Preparing Orders Section (New) -->
+            <div class="content-header" id="preparing-section">
+                <h2><i class="fas fa-blender"></i> Preparing Orders</h2>
             </div>
             
-            <!-- Order 6 -->
-            <div class="order-card" data-id="6">
-                <div class="card-header">
-                    <div class="table-number">Table #3</div>
-                    <div class="order-time">7 min ago</div>
-                </div>
-                <div class="card-body">
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Vegetable Stir Fry</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$22.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Steamed Rice</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$8.00</div>
-                        </div>
-                        <div class="order-item">
-                            <div class="item-details">
-                                <div class="item-name">Green Tea</div>
-                                <div class="item-amount">Amount: 2</div>
-                            </div>
-                            <div class="item-price">$6.00</div>
-                        </div>
+            <div class="orders-container" id="preparing-orders">
+                <!-- Preparing orders will be moved here dynamically -->
+            </div>
+            
+            <!-- Completion Animation -->
+            <div class="completion-animation" id="completion-animation">
+                <span class="checkmark"><i class="fas fa-check"></i></span>
+                Order Completed!
+            </div>
+            
+            <!-- Cancellation Animation -->
+            <div class="cancellation-animation" id="cancellation-animation">
+                <span class="crossmark"><i class="fas fa-times"></i></span>
+                Order Cancelled!
+            </div>
+            
+            <!-- Confirmation Modal -->
+            <div class="confirmation-modal" id="confirmation-modal">
+                <div class="modal-content">
+                    <div class="modal-title">
+                        <i class="fas fa-exclamation-circle"></i> Confirm Cancellation
                     </div>
-                    <div class="order-total">
-                        <div>Total:</div>
-                        <div>$36.00</div>
+                    <div class="modal-message">
+                        Are you sure you want to cancel this order? This action cannot be undone.
                     </div>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-prepare">Preparing</button>
-                    <button class="btn btn-complete">Complete</button>
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
+                        <button class="modal-btn modal-btn-confirm" id="modal-confirm">Yes, Cancel Order</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="completion-animation" id="completion-animation">
-        <i class="checkmark">✓</i> Order Completed!
-    </div>
-
     <script>
-        // Update order count
-        function updateOrderCount() {
-            const orderCount = document.querySelectorAll('.order-card:not(.deleting)').length;
-            document.getElementById('order-count').textContent = orderCount;
-        }
-        
-        // Show completion animation
-        function showCompletionAnimation() {
-            const animation = document.getElementById('completion-animation');
-            animation.style.display = 'block';
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation functionality
+            const navPendingPaid = document.getElementById('nav-pending-paid');
+            const navPendingCash = document.getElementById('nav-pending-cash');
+            const navPendingPrep = document.getElementById('nav-pending-prep');
             
-            setTimeout(() => {
-                animation.style.display = 'none';
-            }, 1500);
-        }
-        
-        // Complete order functionality
-        document.querySelectorAll('.btn-complete').forEach(button => {
-            button.addEventListener('click', function() {
-                const card = this.closest('.order-card');
-                
-                // Add deleting class for animation
-                card.classList.add('deleting');
-                
-                // Show completion animation
-                showCompletionAnimation();
-                
-                // Remove card after animation completes
-                setTimeout(() => {
-                    card.remove();
-                    updateOrderCount();
-                }, 400);
+            const cashSection = document.getElementById('cash-section');
+            const pendingSection = document.getElementById('pending-section');
+            const preparingSection = document.getElementById('preparing-section');
+            
+            // Function to scroll to a section
+            function scrollToSection(section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Add click event listeners to sidebar items
+            navPendingPaid.addEventListener('click', function() {
+                scrollToSection(cashSection);
             });
-        });
-        
-        // Preparing button functionality
-        document.querySelectorAll('.btn-prepare').forEach(button => {
-            button.addEventListener('click', function() {
-                this.style.backgroundColor = '#e63946';
-                this.textContent = 'Preparing...';
+            
+            navPendingCash.addEventListener('click', function() {
+                scrollToSection(pendingSection);
             });
+            
+            navPendingPrep.addEventListener('click', function() {
+                scrollToSection(preparingSection);
+            });
+            
+            // Order management functionality
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const modalCancelBtn = document.getElementById('modal-cancel');
+            const modalConfirmBtn = document.getElementById('modal-confirm');
+            const completionAnimation = document.getElementById('completion-animation');
+            const cancellationAnimation = document.getElementById('cancellation-animation');
+            
+            let currentOrderToCancel = null;
+            
+            // Sample orders data
+            const orders = [
+                {
+                    id: 1,
+                    type: 'pending',
+                    table: 'Table #5',
+                    paymentStatus: 'Already Paid',
+                    time: '12 min ago',
+                    items: [
+                        { name: 'Margherita Pizza', amount: 2, price: 22.00 },
+                        { name: 'Caesar Salad', amount: 1, price: 9.50 },
+                        { name: 'Sparkling Water', amount: 3, price: 9.00 }
+                    ],
+                    total: 40.50
+                },
+                {
+                    id: 2,
+                    type: 'cash',
+                    table: 'Table #12',
+                    code: '#482619',
+                    paymentStatus: 'Cash on Table',
+                    time: '8 min ago',
+                    items: [
+                        { name: 'Beef Burger', amount: 2, price: 24.00 },
+                        { name: 'French Fries', amount: 2, price: 10.00 },
+                        { name: 'Chocolate Shake', amount: 1, price: 6.50 },
+                        { name: 'Onion Rings', amount: 2, price: 8.00 }
+                    ],
+                    total: 48.50
+                },
+                {
+                    id: 3,
+                    type: 'cash',
+                    table: 'Table #8',
+                    code: '#739205',
+                    paymentStatus: 'Cash on Table',
+                    time: '5 min ago',
+                    items: [
+                        { name: 'Grilled Salmon', amount: 1, price: 18.00 },
+                        { name: 'Mashed Potatoes', amount: 1, price: 5.50 },
+                        { name: 'House Salad', amount: 1, price: 7.00 }
+                    ],
+                    total: 30.50
+                },
+                {
+                    id: 4,
+                    type: 'pending',
+                    table: 'Takeaway #3',
+                    paymentStatus: 'Already Paid',
+                    time: '15 min ago',
+                    items: [
+                        { name: 'Chicken Wings', amount: 3, price: 24.00 },
+                        { name: 'Coleslaw', amount: 2, price: 10.00 },
+                        { name: 'Iced Tea', amount: 2, price: 10.00 }
+                    ],
+                    total: 44.00
+                },
+                {
+                    id: 5,
+                    type: 'cash',
+                    table: 'Table #10',
+                    code: '#156842',
+                    paymentStatus: 'Cash on Table',
+                    time: '18 min ago',
+                    items: [
+                        { name: 'Prime Rib Steak', amount: 2, price: 48.00 },
+                        { name: 'Baked Potato', amount: 2, price: 10.00 },
+                        { name: 'Red Wine', amount: 1, price: 12.00 }
+                    ],
+                    total: 70.00
+                },
+                {
+                    id: 6,
+                    type: 'pending',
+                    table: 'Table #7',
+                    paymentStatus: 'Already Paid',
+                    time: '3 min ago',
+                    items: [
+                        { name: 'Vegetable Pasta', amount: 1, price: 14.50 },
+                        { name: 'Garlic Bread', amount: 2, price: 8.00 },
+                        { name: 'Mineral Water', amount: 2, price: 6.00 }
+                    ],
+                    total: 28.50
+                },
+                {
+                    id: 7,
+                    type: 'cash',
+                    table: 'Table #15',
+                    code: '#999888',
+                    paymentStatus: 'Cash on Table',
+                    time: '5 min ago',
+                    items: [
+                        { name: 'Premium Steak', amount: 1, price: 35.00 },
+                        { name: 'Truffle Fries', amount: 2, price: 20.00 }
+                    ],
+                    total: 55.00
+                },
+                {
+                    id: 8,
+                    type: 'cash',
+                    table: 'Table #16',
+                    code: '#777666',
+                    paymentStatus: 'Cash on Table',
+                    time: '5 min ago',
+                    items: [
+                        { name: 'Chicken Platter', amount: 2, price: 30.00 },
+                        { name: 'Soft Drinks', amount: 3, price: 15.00 }
+                    ],
+                    total: 45.00
+                }
+            ];
+            
+            // Render orders
+            function renderOrders() {
+                const cashOrdersContainer = document.getElementById('cash-orders');
+                const pendingOrdersContainer = document.getElementById('pending-orders');
+                
+                // Clear existing orders
+                cashOrdersContainer.innerHTML = '';
+                pendingOrdersContainer.innerHTML = '';
+                
+                // Render orders
+                orders.forEach(order => {
+                    if (order.type === 'cash') {
+                        cashOrdersContainer.appendChild(createOrderCard(order));
+                    } else if (order.type === 'pending') {
+                        pendingOrdersContainer.appendChild(createOrderCard(order));
+                    }
+                });
+                
+                // Update order counts
+                updateOrderCounts();
+            }
+            
+            // Create order card
+            function createOrderCard(order) {
+                const orderCard = document.createElement('div');
+                orderCard.className = `order-card ${order.type}`;
+                orderCard.dataset.id = order.id;
+                orderCard.dataset.time = order.time.split(' ')[0];
+                orderCard.dataset.total = order.total;
+                
+                // Card header
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header';
+                
+                const headerContent = document.createElement('div');
+                headerContent.className = 'header-content';
+                
+                const tableNumber = document.createElement('div');
+                tableNumber.className = 'table-number';
+                tableNumber.textContent = order.table;
+                
+                const orderMeta = document.createElement('div');
+                orderMeta.className = 'order-meta';
+                
+                if (order.code) {
+                    const orderCode = document.createElement('div');
+                    orderCode.className = 'order-code';
+                    orderCode.textContent = order.code;
+                    orderMeta.appendChild(orderCode);
+                }
+                
+                const paymentStatus = document.createElement('div');
+                paymentStatus.className = 'payment-status';
+                paymentStatus.textContent = order.paymentStatus;
+                orderMeta.appendChild(paymentStatus);
+                
+                headerContent.appendChild(tableNumber);
+                headerContent.appendChild(orderMeta);
+                
+                const headerRight = document.createElement('div');
+                headerRight.className = 'header-right';
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-cancel-header';
+                cancelBtn.title = 'Cancel Order';
+                cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+                
+                const orderTime = document.createElement('div');
+                orderTime.className = 'order-time';
+                orderTime.innerHTML = `<i class="far fa-clock"></i> ${order.time}`;
+                
+                headerRight.appendChild(cancelBtn);
+                headerRight.appendChild(orderTime);
+                
+                cardHeader.appendChild(headerContent);
+                cardHeader.appendChild(headerRight);
+                
+                // Card body
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                const orderItems = document.createElement('div');
+                orderItems.className = 'order-items';
+                
+                order.items.forEach(item => {
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'order-item';
+                    
+                    const itemDetails = document.createElement('div');
+                    itemDetails.className = 'item-details';
+                    
+                    const itemName = document.createElement('div');
+                    itemName.className = 'item-name';
+                    itemName.textContent = item.name;
+                    
+                    const itemAmount = document.createElement('div');
+                    itemAmount.className = 'item-amount';
+                    itemAmount.textContent = `Amount: ${item.amount}`;
+                    
+                    itemDetails.appendChild(itemName);
+                    itemDetails.appendChild(itemAmount);
+                    
+                    const itemPrice = document.createElement('div');
+                    itemPrice.className = 'item-price';
+                    itemPrice.textContent = `Rs.${item.price.toFixed(2)}`;
+                    
+                    orderItem.appendChild(itemDetails);
+                    orderItem.appendChild(itemPrice);
+                    orderItems.appendChild(orderItem);
+                });
+                
+                const orderTotal = document.createElement('div');
+                orderTotal.className = 'order-total';
+                orderTotal.innerHTML = `<div>Total:</div><div>Rs.${order.total.toFixed(2)}</div>`;
+                
+                cardBody.appendChild(orderItems);
+                cardBody.appendChild(orderTotal);
+                
+                // Card footer (only for pending orders)
+                if (order.type === 'pending') {
+                    const cardFooter = document.createElement('div');
+                    cardFooter.className = 'card-footer';
+                    
+                    const prepareBtn = document.createElement('button');
+                    prepareBtn.className = 'btn btn-prepare';
+                    prepareBtn.innerHTML = '<i class="fas fa-blender"></i> Prepare';
+                    
+                    const completeBtn = document.createElement('button');
+                    completeBtn.className = 'btn btn-complete';
+                    completeBtn.innerHTML = '<i class="fas fa-check"></i> Complete';
+                    
+                    cardFooter.appendChild(prepareBtn);
+                    cardFooter.appendChild(completeBtn);
+                    
+                    orderCard.appendChild(cardHeader);
+                    orderCard.appendChild(cardBody);
+                    orderCard.appendChild(cardFooter);
+                } else {
+                    // For cash orders, hide the footer
+                    const cardFooter = document.createElement('div');
+                    cardFooter.className = 'card-footer';
+                    cardFooter.style.display = 'none';
+                    
+                    orderCard.appendChild(cardHeader);
+                    orderCard.appendChild(cardBody);
+                    orderCard.appendChild(cardFooter);
+                }
+                
+                // Add event listeners
+                addEventListenersToOrderCard(orderCard);
+                
+                return orderCard;
+            }
+            
+            // Add event listeners to order card
+            function addEventListenersToOrderCard(orderCard) {
+                const prepareBtn = orderCard.querySelector('.btn-prepare');
+                const completeBtn = orderCard.querySelector('.btn-complete');
+                const cancelBtn = orderCard.querySelector('.btn-cancel-header');
+                
+                if (prepareBtn) {
+                    prepareBtn.addEventListener('click', function() {
+                        const orderId = parseInt(orderCard.dataset.id);
+                        const order = orders.find(o => o.id === orderId);
+                        
+                        if (order && order.type === 'pending') {
+                            // Change order type to preparing
+                            order.type = 'preparing';
+                            
+                            // Move to preparing section
+                            const preparingOrdersContainer = document.getElementById('preparing-orders');
+                            const orderClone = orderCard.cloneNode(true);
+                            
+                            // Update the button to show preparing state
+                            const prepareBtn = orderClone.querySelector('.btn-prepare');
+                            prepareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing';
+                            prepareBtn.classList.add('preparing');
+                            
+                            // Add to preparing section
+                            preparingOrdersContainer.appendChild(orderClone);
+                            
+                            // Remove from pending orders
+                            orderCard.classList.add('deleting');
+                            setTimeout(() => {
+                                orderCard.remove();
+                                updateOrderCounts();
+                            }, 300);
+                            
+                            // Update preparing count
+                            updateOrderCounts();
+                            
+                            // Add event listeners to the new card
+                            addEventListenersToOrderCard(orderClone);
+                        }
+                    });
+                }
+                
+                if (completeBtn) {
+                    completeBtn.addEventListener('click', function() {
+                        const orderId = parseInt(orderCard.dataset.id);
+                        const orderIndex = orders.findIndex(o => o.id === orderId);
+                        
+                        if (orderIndex !== -1) {
+                            // Remove order from array
+                            orders.splice(orderIndex, 1);
+                            
+                            // Show completion animation
+                            completionAnimation.style.display = 'block';
+                            
+                            // Remove order after animation
+                            setTimeout(() => {
+                                orderCard.classList.add('deleting');
+                                setTimeout(() => {
+                                    orderCard.remove();
+                                    updateOrderCounts();
+                                }, 300);
+                                
+                                // Hide animation after it completes
+                                setTimeout(() => {
+                                    completionAnimation.style.display = 'none';
+                                }, 1500);
+                            }, 1500);
+                        }
+                    });
+                }
+                
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        const orderId = parseInt(orderCard.dataset.id);
+                        currentOrderToCancel = { orderCard, orderId };
+                        
+                        // Show confirmation modal
+                        confirmationModal.classList.add('active');
+                    });
+                }
+            }
+            
+            // Modal buttons
+            modalCancelBtn.addEventListener('click', function() {
+                confirmationModal.classList.remove('active');
+                currentOrderToCancel = null;
+            });
+            
+            modalConfirmBtn.addEventListener('click', function() {
+                if (currentOrderToCancel) {
+                    const { orderCard, orderId } = currentOrderToCancel;
+                    const orderIndex = orders.findIndex(o => o.id === orderId);
+                    
+                    if (orderIndex !== -1) {
+                        // Remove order from array
+                        orders.splice(orderIndex, 1);
+                        
+                        // Show cancellation animation
+                        cancellationAnimation.style.display = 'block';
+                        
+                        // Remove order after animation
+                        setTimeout(() => {
+                            orderCard.classList.add('deleting');
+                            setTimeout(() => {
+                                orderCard.remove();
+                                updateOrderCounts();
+                            }, 300);
+                            
+                            // Hide animation after it completes
+                            setTimeout(() => {
+                                cancellationAnimation.style.display = 'none';
+                            }, 1500);
+                        }, 1500);
+                    }
+                    
+                    confirmationModal.classList.remove('active');
+                    currentOrderToCancel = null;
+                }
+            });
+            
+            // Update order counts
+            function updateOrderCounts() {
+                const pendingCount = orders.filter(order => order.type === 'pending').length;
+                const cashCount = orders.filter(order => order.type === 'cash').length;
+                const preparingCount = orders.filter(order => order.type === 'preparing').length;
+                
+                document.getElementById('pending-count').textContent = pendingCount;
+                document.getElementById('cash-count').textContent = cashCount;
+                document.getElementById('preparing-count').textContent = preparingCount;
+            }
+            
+            // Initialize
+            renderOrders();
         });
-        
-        // Initialize order count
-        updateOrderCount();
     </script>
 </body>
 </html>
